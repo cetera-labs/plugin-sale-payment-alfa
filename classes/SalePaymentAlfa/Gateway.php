@@ -39,7 +39,7 @@ class Gateway extends \Sale\PaymentGateway\GatewayAbstract {
             'password'    => $this->params['password'],
             'orderNumber' => urlencode($this->order->id),
             'amount'      => urlencode($this->order->getTotal()*100),
-            'returnUrl'   => \Cetera\Application::getInstance()->getServer()->getFullUrl().'/plugins/sale-payment-alfa/callback.php?return='.urlencode($return)
+            'returnUrl'   => \Cetera\Application::getInstance()->getServer()->getFullUrl().'/plugins/sale-payment-alfa/callback.php?oid='.urlencode($this->order->id).'&return='.urlencode($return)
         ];
 
         $response = $this->gateway('register.do', $data);
@@ -48,6 +48,9 @@ class Gateway extends \Sale\PaymentGateway\GatewayAbstract {
             echo 'Ошибка #' . $response['errorCode'] . ': ' . $response['errorMessage'];
             die();
         } else { // В случае успеха перенаправить пользователя на платежную форму
+        
+            $this->saveTransaction($response['orderId'], $response);
+        
             header('Location: ' . $response['formUrl']);
             die();
         }        

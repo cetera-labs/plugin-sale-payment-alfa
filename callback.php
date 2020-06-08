@@ -6,14 +6,20 @@ $application->initPlugins();
 try {
     
     if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['orderId'])) {
+               
         
-        $order = \Sale\Order::getById( $_GET['orderId'] );
+        $order = \Sale\Order::getById( $_GET['oid'] );
         $gateway = $order->getPaymentGateway();
+        
+        $oid = $gateway->getOrderByTransaction( $_GET['orderId'] );
+        if ($oid != $order->id) {
+            throw new \Exception('Order check failed');
+        }        
         
         $data = [
             'userName' => $gateway->params['login'],
             'password' => $gateway->params['password'],
-            'orderId'  => $order->id
+            'orderId'  => $_GET['orderId']
         ];  
 
         /**
